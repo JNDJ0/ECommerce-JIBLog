@@ -10,5 +10,5 @@ Sistema simples e-commerce, cujas principais features incluem cadastro e autenti
 
 ## Explicação das tecnologias
 
-Para o front-end serão usados <b>HTML, CSS e TypeScript</b>, para o <b>back-end Node, TypeScript e Postman</b> e, finalmente, para o banco de dados, <b>SQLite e Prisma.</b> <br>
+Na aplicação principal, o front-end será feito utilizando <b>HTML, CSS e TypeScript</b>; o back-end, <b>Node, TypeScript e Postman</b> junto com <b>SQLite e Prisma.</b> para o banco de dados. <br>
 Para a realização dos testes de unidade e de integração, será utilizado o framework <b>Jest.</b>
