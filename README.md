@@ -1,4 +1,4 @@
-# TP:
+# TP: Testes de software em um sistema de e-commerce
 
 ## Membros do grupo
 - Beatriz Reis Gama Barbosa
@@ -10,4 +10,5 @@ Sistema simples e-commerce, cujas principais features incluem cadastro e autenti
 
 ## Explicação das tecnologias
 
-Para o front-end serão usados HTML, CSS e TypeScript, para o back-end Node, TypeScript e Postman e, finalmente, para o banco de dados, SQLite e Prisma.
+Para o front-end serão usados <b>HTML, CSS e TypeScript</b>, para o <b>back-end Node, TypeScript e Postman</b> e, finalmente, para o banco de dados, <b>SQLite e Prisma.</b> <br>
+Para a realização dos testes de unidade e de integração, será utilizado o framework <b>Jest.</b>
