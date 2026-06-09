@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+    <html lang="pt-br"> 
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>JibLog</title>
+        <link rel="icon" type="image/x-icon" href="logo.png">
+        <link rel="stylesheet" href="pedido-styles.css">
+    </head>
+</html>
+    
+<header>
+    <h1>JibLog</h1>
+    <img src="logo.png" alt="logo JibLog" width="170" > 
+</header>
+
+<nav>
+    <a href="index.html">Início</a>
+    <a id = "myaccount" href="conta.html">Minha Área</a>
+    <a id = "logout" href="login.html" onclick="logout()"> Logout</a>
+</nav>
+
+<body>
+
+    <main>
+        <h3>Digite o código do seu pedido para rastreá-lo:</h3>
+        <input type="text" name="código_do_produto" id = "code">
+        <br><br>
+        <input type="button" class="button" value="BUSCAR" onclick="getMapProduct()">
+
+    </main>
+
+    <div id = "map" style="display: none"></div>
+    <div id = "products"></div>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD6us_c7jBrjT1_CtV22YodcL4P9t4WgoA"></script>
+    <script>
+        document.getElementById("products").style.display = "none";
+        if (document.cookie == ""){
+            document.getElementById("logout").style.display = "none";
+            document.getElementById("myaccount").style.display = "none";
+        } 
+
+        function getMapProduct(event) {
+            
+            let url = "http://localhost:3030/api/orders/" + document.getElementById("code").value;
+            console.log(url);
+            fetch(url, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                credentials: "include"
+            })
+            .then(response => response.json())
+            .then(orderData => {
+                console.log(orderData);
+                url = "http://localhost:3030/api/products/getById/" + orderData.productId;
+                fetch(url, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    credentials: "include"
+                })
+                .then(response => response.json())
+                .then(productData => {
+                    var geocoder = new google.maps.Geocoder();
+                    console.log(productData);
+                    document.getElementById("map").style.display = "block";
+                    geocoder.geocode({'address': String(productData.location)}, function(results, status) {
+                        if (status === 'OK') {
+                            var map = new google.maps.Map(document.getElementById('map'), {
+                                zoom: 18,
+                                center: results[0].geometry.location
+                            });
+                            var marker = new google.maps.Marker({
+                                map: map,
+                                position: results[0].geometry.location
+                            });
+                        } else {
+                            alert('Geocode was not successful for the following reason: ' + status);
+                        }
+                    });
+                });
+            });
+        }
+
+        function getProducts(){
+            let url = "http://localhost:3030/api/orders/order";
+            document.getElementById("products").style.display = "block";
+            fetch(url, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                credentials: "include"
+            })
+            .then(response => response.json())
+            .then(orderData => {
+                let fetchPromises = []; 
+
+                for (let i in orderData) {
+                    let idx = parseInt(i) + 1; 
+                    let productId = orderData[i].productId;
+                    let productFetch = fetch("http://localhost:3030/api/products/getById/" + productId, {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        credentials: "include"
+                    })
+                    .then(response => response.json())
+                    .then(productData => {
+                        return "<div class='centered-div'>" +
+                            "<h4>" + productData.name + "</h4>" +
+                            "<p>" + orderData[i].code + "</p>" +
+                            "<p><i>" + productData.description + "</i></p>" +
+                            "<p>R$ " + productData.price + "</p></div><br>";
+                    });
+
+                    fetchPromises.push(productFetch); 
+                }
+
+                return Promise.all(fetchPromises);
+            })
+            .then(productDivs => {
+                let rowsHtml = '';
+                for (let i = 0; i < productDivs.length; i += 3) {
+                    let rowDivs = productDivs.slice(i, i + 3).join('');
+                    rowsHtml += "<div class='product-row'>" + rowDivs + "</div>";
+                }
+                document.getElementById("products").innerHTML = rowsHtml;
+            })
+            .catch(error => {
+                console.error('Error fetching product data:', error);
+            });
+        }
+        function logout(){
+            const url = "http://localhost:3030/api/users/logout";
+
+            fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                credentials: "include"
+            })
+            .then(response => {
+                response.json(); 
+                console.log(response);
+                if(response.status != 200){
+                    alert(response.statusText);
+                } 
+                else {
+                    window.location.href = "index.html";
+                }
+            })
+        }
+        getProducts();
+    </script>
+    <footer>
+        <p>JibLog &copy; 2024</p>
+    </footer>
+</body>
+</body>

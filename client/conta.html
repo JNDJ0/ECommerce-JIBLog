@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+    <html lang="pt-br"> 
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>JibLog</title>
+        <link rel="icon" type="image/x-icon" href="logo.png">
+    </head>
+</html>
+<style>
+    body{
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+    }
+
+    header{
+        color: #fff;
+        background-color: #177757;
+        text-align: center;
+        padding: 20px;
+    }
+
+    nav {
+        display: flex;
+        justify-content: center;
+        background-color: #fff;
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+        }
+
+        nav a {
+        margin: 0 15px;
+        text-decoration: none;
+        color: #177757;
+        font-weight: bold;
+        }
+
+        nav a:hover {
+        color: #0f5c3d;
+    }
+
+    main {
+        padding: 20px;
+        max-width: 800px;
+        margin: 0 auto;
+        }
+
+    footer{
+        background-color: #177757;
+        text-align: center;
+        padding: 10px;
+        position: relative;
+        bottom: 0;
+        width: 100%;
+    }
+    .user-account-info {
+      width: 300px;
+      padding: 20px;
+      background-color: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      font-family: Arial, sans-serif;
+      color: #333;
+    }
+
+    .button {
+        padding: 8px 5px;
+        background-color: #177757;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 16px;
+        transition: background-color 0.3s ease;
+        width: 100px;
+        text-decoration: none;
+    }
+
+    .user-account-info h2 {
+        font-size: 1.5em;
+        margin: 0 0 10px;
+    }
+
+    .user-account-info p {
+      margin: 8px 0;
+      font-size: 1em;
+      line-height: 1.4;
+    }
+
+    .user-account-info .username {
+      font-weight: bold;
+      color: #333;
+    }
+</style>
+<body>
+    <header>
+        <h1>JibLog</h1>
+        <img src="logo.png" alt="logo JibLog" width="170" > 
+    </header>
+    
+    <nav>
+        <a href="index.html">Início</a>
+        <a id = "pedidos"></a>
+        <a id = "login" href="login.html">Login</a>
+        <a id = "logout" href="login.html" onclick="logout()"> Logout</a>
+    </nav>
+
+    <main>
+        <div id="myaccount" class="user-account-info"></div>
+        <br>
+        <a id = "register-product" class = "button">Cadastrar produto</a>
+    </main>
+
+    <script>
+        let url = 'http://localhost:3030/api/users/myAccount';
+
+        let str_html = "<h2>Minha Área</h2>";
+        
+        fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            credentials: "include",
+        })
+        .then(response => response.json())
+        .then(data => {
+            const role = data.role;
+            console.log(role);
+            if (role !== "owner"){
+                document.getElementById("register-product").href = "fazer_pedido.html";
+                document.getElementById("register-product").innerHTML = "Fazer pedido";
+                document.getElementById("pedidos").href = "pedido.html";
+                document.getElementById("pedidos").innerHTML = "Meus Pedidos";
+            }
+            else{
+                document.getElementById("register-product").href = "cadastro_produto.html";
+                document.getElementById("register-product").innerHTML = "Cadastrar produto";
+                document.getElementById("pedidos").href = "meus_produtos_owner.html";
+                document.getElementById("pedidos").innerHTML = "Meus Produtos";
+            }
+            str_html += "<p>Nome: " + data.name + "</p>";
+            str_html += "<p>Email: " + data.email + "</p>";
+            document.getElementById("myaccount").innerHTML = str_html 
+        });
+
+        function logout(){
+            let url = "http://localhost:3030/api/users/logout";
+
+            fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                credentials: "include"
+            })
+            .then(response => {
+                response.json(); 
+                if(response.status != 200){
+                    alert(response.statusText);
+                } 
+                else {
+                    window.location.href = "index.html";
+                }
+            })
+        }
+    </script>
+    <script>
+        if (document.cookie){
+            document.getElementById("login").style.display = "none";
+        }
+    </script>
+
+    <footer>
+        <p>JibLog &copy; 2024</p>
+    </footer>
+</body>
+    
+</html>
