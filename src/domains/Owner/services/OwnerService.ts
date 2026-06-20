@@ -1,6 +1,7 @@
 import prisma from '../../../../config/client';
 import UserService from '../../User/services/UserService';
-import { Owner, User} from '@prisma/client'; 
+import { Owner, User} from '@prisma/client';
+import { QueryError } from '../../../../errors/QueryError';
 
 class OwnerService{
 	async create(body: User){
@@ -19,6 +20,11 @@ class OwnerService{
 
 	async findByEmail(email: string){
 		const user = await prisma.user.findFirst({where:{email: email}});
+
+		if (!user) {
+			throw new QueryError('Proprietário não encontrado.');
+		}
+
 		const owner = await prisma.owner.findFirst({where:{userId: user.id}});
 
 		return owner;
