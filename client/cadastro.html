@@ -41,10 +41,15 @@
             </div>
             <div class="form-group">
                 <label for="type">Tipo de conta</label>
-                <select id="type">
+                <select id="type" onchange="onTypeChange()">
                     <option value="user">Cliente</option>
                     <option value="owner">Proprietário de estabelecimento</option>
+                    <option value="deliverer">Entregador</option>
                 </select>
+            </div>
+            <div class="form-group" id="region-group" style="display:none">
+                <label for="region">Região de atuação</label>
+                <input type="text" id="region" placeholder="Ex: São Paulo - SP">
             </div>
             <div class="form-group">
                 <label for="password">Senha</label>
@@ -67,6 +72,11 @@
 
 <script src="utils.js"></script>
 <script>
+    function onTypeChange() {
+        const role = document.getElementById('type').value;
+        document.getElementById('region-group').style.display = role === 'deliverer' ? 'block' : 'none';
+    }
+
     document.getElementById('registerForm').addEventListener('submit', async function(e) {
         e.preventDefault();
         const errorEl   = document.getElementById('error-msg');
@@ -80,6 +90,7 @@
         const role     = document.getElementById('type').value;
         const password = document.getElementById('password').value;
         const confirm  = document.getElementById('password-confirm').value;
+        const region   = document.getElementById('region').value.trim();
 
         if (password !== confirm) {
             errorEl.textContent = 'As senhas não coincidem.';
@@ -87,16 +98,27 @@
             return;
         }
 
+        if (role === 'deliverer' && !region) {
+            errorEl.textContent = 'Informe a região de atuação.';
+            errorEl.style.display = 'block';
+            return;
+        }
+
         const url = role === 'owner'
             ? `${API}/owners/create`
-            : `${API}/users/create`;
+            : role === 'deliverer'
+                ? `${API}/deliverers/create`
+                : `${API}/users/create`;
+
+        const body = { name, email, address, password };
+        if (role === 'deliverer') body.region = region;
 
         try {
             const res = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
-                body: JSON.stringify({ name, email, address, password })
+                body: JSON.stringify(body)
             });
 
             if (res.ok) {

@@ -72,6 +72,9 @@
             if (data.role === 'owner') {
                 link.href = 'meus_produtos_owner.html';
                 link.textContent = 'Meus Produtos';
+            } else if (data.role === 'deliverer') {
+                link.href = 'meus_pedidos_entregador.html';
+                link.textContent = 'Minhas Entregas';
             } else {
                 link.href = 'pedido.html';
                 link.textContent = 'Meus Pedidos';

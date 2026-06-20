@@ -92,6 +92,11 @@
             ctaBtn.textContent = '+ Cadastrar Produto';
             actionLink.href  = 'meus_produtos_owner.html';
             actionLink.textContent = 'Meus Produtos';
+        } else if (data.role === 'deliverer') {
+            ctaBtn.href      = 'meus_pedidos_entregador.html';
+            ctaBtn.textContent = 'Minhas Entregas';
+            actionLink.href  = 'meus_pedidos_entregador.html';
+            actionLink.textContent = 'Minhas Entregas';
         } else {
             ctaBtn.href      = 'fazer_pedido.html';
             ctaBtn.textContent = '+ Fazer Pedido';
