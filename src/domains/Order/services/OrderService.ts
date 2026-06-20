@@ -47,10 +47,12 @@ const TRANSITIONS: Record<string, Record<OrderStatus, OrderStatus[]>> = {
 };
 
 class OrderService {
-	async create(body: Order, userId: number) {
+	async create(body: Order & { quantity?: number }, userId: number) {
 		if (!['Dinheiro', 'Cartão', 'Pix'].includes(body.payment)) {
 			throw new InvalidParamError('Método inválido de pagamento');
 		}
+
+		const qty = body.quantity && +body.quantity > 0 ? +body.quantity : 1;
 
 		const product = await prisma.product.findFirst({ where: { id: +body.productId } });
 
@@ -62,11 +64,16 @@ class OrderService {
 			throw new QueryError('Produto sem estoque disponível.');
 		}
 
+		if (product.quantity < qty) {
+			throw new InvalidParamError(`Estoque insuficiente. Disponível: ${product.quantity}`);
+		}
+
 		const [order] = await prisma.$transaction([
 			prisma.order.create({
 				data: {
 					payment:   body.payment,
-					delivery:  product.price + 20,
+					delivery:  product.price * qty + 20,
+					quantity:  qty,
 					status:    ORDER_STATUS.PENDENTE,
 					userId:    userId,
 					productId: +body.productId,
@@ -74,7 +81,7 @@ class OrderService {
 			}),
 			prisma.product.update({
 				where: { id: product.id },
-				data:  { quantity: product.quantity - 1 },
+				data:  { quantity: product.quantity - qty },
 			}),
 		]);
 
@@ -110,13 +117,13 @@ class OrderService {
 			);
 		}
 
-		// Ao cancelar, devolve o estoque
+		// Ao cancelar, devolve o estoque na quantidade do pedido
 		if (newStatus === ORDER_STATUS.CANCELADO) {
 			await prisma.$transaction([
 				prisma.order.update({ where: { id: order.id }, data: { status: newStatus } }),
 				prisma.product.update({
 					where: { id: order.productId },
-					data:  { quantity: { increment: 1 } },
+					data:  { quantity: { increment: order.quantity } },
 				}),
 			]);
 		} else if (newStatus === ORDER_STATUS.EM_ENTREGA) {

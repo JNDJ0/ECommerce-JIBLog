@@ -28,6 +28,16 @@
             <div class="loading">Carregando produto...</div>
         </div>
 
+        <div class="card" style="margin-bottom:20px">
+            <p class="card-title">Quantidade</p>
+            <div style="display:flex;align-items:center;gap:12px">
+                <button class="btn btn-outline btn-sm" onclick="changeQty(-1)">−</button>
+                <span id="qty-display" style="font-size:1.1rem;font-weight:700;min-width:32px;text-align:center">1</span>
+                <button class="btn btn-outline btn-sm" onclick="changeQty(1)">+</button>
+                <span id="qty-stock" style="font-size:0.8rem;color:var(--text-muted);margin-left:4px"></span>
+            </div>
+        </div>
+
         <div class="card">
             <p class="card-title">Escolha o método de pagamento</p>
             <div id="payment-options" class="payment-grid">
@@ -58,6 +68,9 @@
     const params    = new URLSearchParams(window.location.search);
     const productId = params.get('productId');
 
+    let currentProduct = null;
+    let qty = 1;
+
     if (!productId) {
         document.getElementById('product-info').innerHTML = '<p class="alert alert-error">Nenhum produto selecionado.</p>';
         document.getElementById('payment-options').style.display = 'none';
@@ -66,17 +79,36 @@
             .then(r => r.ok ? r.json() : null)
             .then(p => {
                 if (!p) { document.getElementById('product-info').innerHTML = '<p>Produto não encontrado.</p>'; return; }
-                document.getElementById('product-info').innerHTML = `
-                    <p class="card-title">Resumo do pedido</p>
-                    <p style="font-weight:700;font-size:1rem">${p.name}</p>
-                    <p style="font-size:0.875rem;color:var(--text-muted);margin-top:4px">${p.description}</p>
-                    <p style="margin-top:12px;font-size:0.9rem">Produto: <strong>R$ ${Number(p.price).toFixed(2)}</strong></p>
-                    <p style="font-size:0.9rem">Taxa de entrega: <strong>R$ 20,00</strong></p>
-                    <p style="font-size:1rem;font-weight:700;color:var(--primary);margin-top:8px">
-                        Total: R$ ${(Number(p.price) + 20).toFixed(2)}
-                    </p>
-                `;
+                currentProduct = p;
+                document.getElementById('qty-stock').textContent = `Disponível: ${p.quantity}`;
+                updateSummary();
             });
+    }
+
+    function updateSummary() {
+        if (!currentProduct) return;
+        const p = currentProduct;
+        document.getElementById('qty-display').textContent = qty;
+        const total = (Number(p.price) * qty + 20).toFixed(2);
+        document.getElementById('product-info').innerHTML = `
+            <p class="card-title">Resumo do pedido</p>
+            <p style="font-weight:700;font-size:1rem">${p.name}</p>
+            <p style="font-size:0.875rem;color:var(--text-muted);margin-top:4px">${p.description}</p>
+            <p style="margin-top:12px;font-size:0.9rem">Preço unitário: <strong>R$ ${Number(p.price).toFixed(2)}</strong></p>
+            <p style="font-size:0.9rem">Quantidade: <strong>${qty}</strong></p>
+            <p style="font-size:0.9rem">Taxa de entrega: <strong>R$ 20,00</strong></p>
+            <p style="font-size:1rem;font-weight:700;color:var(--primary);margin-top:8px">
+                Total: R$ ${total}
+            </p>
+        `;
+    }
+
+    function changeQty(delta) {
+        if (!currentProduct) return;
+        const next = qty + delta;
+        if (next < 1 || next > currentProduct.quantity) return;
+        qty = next;
+        updateSummary();
     }
 
     async function placeOrder(paymentMethod) {
@@ -90,7 +122,7 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
-                body: JSON.stringify({ productId, payment: paymentMethod })
+                body: JSON.stringify({ productId, payment: paymentMethod, quantity: qty })
             });
 
             if (res.ok) {
