@@ -47,7 +47,12 @@ class ReviewService {
 		return prisma.review.findFirst({ where: { orderId: order.id } });
 	}
 
-	async findByOwner(ownerId: number) {
+	async findByOwner(userId: number) {
+		const owner = await prisma.owner.findFirst({ where: { userId } });
+		if (!owner) {
+			throw new QueryError('Owner não encontrado.');
+		}
+		const ownerId = owner.id;
 		return prisma.review.findMany({
 			where: {
 				order: {
