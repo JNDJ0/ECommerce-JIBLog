@@ -5,6 +5,7 @@ const config: Config = {
   testEnvironment: "node",
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/src/$1",
+    "^.*/config/client$": "<rootDir>/__mocks__/prisma",
   },
   collectCoverage: true,
   collectCoverageFrom: [
