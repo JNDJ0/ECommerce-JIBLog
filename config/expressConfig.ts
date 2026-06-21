@@ -9,6 +9,7 @@ import OrderRouter from '../src/domains/Order/controller/index';
 import DelivererRouter from '../src/domains/Deliverer/controller/index';
 import ReviewRouter from '../src/domains/Review/controller/index';
 import { errorHandler } from '../src/middlewares/errorHandler';
+import { Request, Response } from 'express';
 
 dotenv.config();
 
@@ -31,6 +32,10 @@ app.use('/api/products',   ProductRouter);
 app.use('/api/orders',     OrderRouter);
 app.use('/api/deliverers', DelivererRouter);
 app.use('/api/reviews',    ReviewRouter);
+
+app.get('/api/config', (_req: Request, res: Response) => {
+	res.json({ googleMapsKey: process.env.GOOGLE_MAPS_API_KEY ?? '' });
+});
 
 app.use(errorHandler);
 

@@ -51,7 +51,17 @@
     <p>JibLog &copy; 2024</p>
 </footer>
 
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD6us_c7jBrjT1_CtV22YodcL4P9t4WgoA"></script>
+<script>
+    (async function loadMapsApi() {
+        try {
+            const res = await fetch('/api/config');
+            const { googleMapsKey } = await res.json();
+            const script = document.createElement('script');
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${googleMapsKey}`;
+            document.head.appendChild(script);
+        } catch (_) {}
+    })();
+</script>
 <script src="utils.js"></script>
 <script>
     if (!isLoggedIn()) window.location.href = 'login.html';
