@@ -17,13 +17,15 @@
 <nav>
     <a href="index.html">Início</a>
     <a href="meus_produtos_owner.html">Meus Produtos</a>
-    <a href="cadastro_produto.html">+ Cadastrar Produto</a>
     <a href="conta.html" id="myaccount">Minha Área</a>
     <a id="logout" href="#" class="nav-logout">Logout</a>
 </nav>
 
 <main>
-    <p class="section-title">Meus Produtos</p>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <p class="section-title" style="margin-bottom:0">Meus Produtos</p>
+        <a href="cadastro_produto.html" class="btn btn-primary">+ Cadastrar Produto</a>
+    </div>
     <div id="product-list" class="product-grid">
         <div class="loading">Carregando produtos...</div>
     </div>
