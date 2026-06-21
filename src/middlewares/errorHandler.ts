@@ -20,7 +20,7 @@ export function errorHandler(error: Error, req: Request, res: Response, next: Ne
     }
 
     if (error instanceof TokenError) {
-        status = statusCodes.NOT_FOUND;
+        status = statusCodes.UNAUTHORIZED;
     }
 
     if (error instanceof QueryError) {
