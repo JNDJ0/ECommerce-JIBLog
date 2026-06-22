@@ -8,8 +8,12 @@ on:
 
 jobs:
   test:
-    name: Instalar dependências, executar testes e gerar relatório de cobertura
-    runs-on: ubuntu-latest
+    name: Testes em ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
 
     steps:
       - name: Checkout do repositório
@@ -26,3 +30,4 @@ jobs:
 
       - name: Executar testes com cobertura
         run: npm run test:coverage
+
