@@ -5,8 +5,47 @@ import prisma from '../../../config/client';
 
 const prismaMock = prisma as unknown as {
     owner:   { findFirst: jest.Mock };
-    product: { create: jest.Mock };
+    product: { create: jest.Mock; findMany: jest.Mock };
 };
+
+describe('ProductService.findProducts', () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
+
+    it('Retornar todos os produtos quando chamado sem filtros', async () => {
+        const produtos = [
+            { id: 1, name: 'Caixa', description: 'Desc', price: 10, quantity: 5, location: 12345678, ownerId: 1 },
+            { id: 2, name: 'Pallet', description: 'Desc', price: 50, quantity: 2, location: 87654321, ownerId: 1 },
+        ];
+        prismaMock.product.findMany.mockResolvedValue(produtos);
+
+        const resultado = await ProductService.findProducts();
+
+        expect(resultado).toEqual(produtos);
+        expect(prismaMock.product.findMany).toHaveBeenCalledWith({ where: {} });
+    });
+
+    it('Filtrar produtos por nome', async () => {
+        prismaMock.product.findMany.mockResolvedValue([]);
+
+        await ProductService.findProducts({ name: 'Caixa' });
+
+        expect(prismaMock.product.findMany).toHaveBeenCalledWith({
+            where: { name: { contains: 'Caixa' } },
+        });
+    });
+
+    it('deve filtrar produtos por intervalo de preço', async () => {
+        prismaMock.product.findMany.mockResolvedValue([]);
+
+        await ProductService.findProducts({ minPrice: 10, maxPrice: 50 });
+
+        expect(prismaMock.product.findMany).toHaveBeenCalledWith({
+            where: { price: { gte: 10, lte: 50 } },
+        });
+    });
+});
 
 describe('ProductService.create', () => {
     beforeEach(() => {
