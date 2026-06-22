@@ -57,3 +57,29 @@ describe('DelivererService.delete', () => {
         expect(prismaMock.user.delete).toHaveBeenCalledWith({ where: { id: 1 } });
     });
 });
+
+describe('DelivererService.updateRegion', () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
+
+    it('deve lançar InvalidParamError quando a região está vazia', async () => {
+        await expect(DelivererService.updateRegion(1, '   ')).rejects.toThrow(InvalidParamError);
+        await expect(DelivererService.updateRegion(1, '')).rejects.toThrow('Região não pode ser vazia.');
+    });
+
+    it('deve atualizar a região com sucesso', async () => {
+        const deliverer = { id: 3, userId: 1, region: 'Sul' };
+        prismaMock.deliverer.findFirst.mockResolvedValue(deliverer);
+        prismaMock.deliverer.update  = jest.fn().mockResolvedValue({ ...deliverer, region: 'Norte' });
+
+        const result = await DelivererService.updateRegion(1, 'Norte');
+
+        expect(prismaMock.deliverer.findFirst).toHaveBeenCalledWith({ where: { userId: 1 } });
+        expect(prismaMock.deliverer.update).toHaveBeenCalledWith({
+            where: { id: deliverer.id },
+            data:  { region: 'Norte' },
+        });
+        expect(result).toMatchObject({ region: 'Norte' });
+    });
+});
