@@ -1,6 +1,7 @@
 import { jest } from "@jest/globals";
 
 const prismaMock = {
+  $transaction: jest.fn(),
   user: {
     create: jest.fn(),
     findUnique: jest.fn(),
