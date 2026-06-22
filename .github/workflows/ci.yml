@@ -31,3 +31,9 @@ jobs:
       - name: Executar testes com cobertura
         run: npm run test:coverage
 
+      - name: Publicar relatório de cobertura no Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: ${{ matrix.os }}
+          fail_ci_if_error: false
