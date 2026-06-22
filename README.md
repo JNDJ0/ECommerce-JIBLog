@@ -60,3 +60,46 @@ Caso a URL apareça como `127.0.0.1`, substitua por `localhost` para que os cook
 | `npm start` | Inicia o servidor com hot-reload (ts-node-dev) |
 | `npx prisma migrate dev` | Aplica as migrations no banco de dados |
 | `npx prisma studio` | Abre o Prisma Studio para inspecionar o banco de dados |
+
+---
+
+## Executando os testes
+
+O projeto utiliza **Jest** + **ts-jest** para testes unitários e de integração/E2E.
+
+### Rodar todos os testes
+
+```bash
+npm test
+```
+
+### Rodar com relatório de cobertura
+
+```bash
+npm run test:coverage
+```
+
+O relatório será gerado na pasta `coverage/` e exibido no terminal. A cobertura mínima exigida é de **80%**.
+
+### Rodar em modo watch (re-executa ao salvar)
+
+```bash
+npm run test:watch
+```
+
+### Estrutura dos testes
+
+```
+__tests__/
+├── unit/
+│   ├── Deliverer/   # DelivererService (create, updateRegion, delete)
+│   ├── Order/       # OrderService (create, updateStatus)
+│   └── Product/     # ProductService
+└── integration/
+    ├── user.e2e.test.ts      # Fluxo criação → login → myAccount
+    ├── order.e2e.test.ts     # Fluxo produto → pedido → estoque
+    └── deliverer.e2e.test.ts # Fluxo completo do entregador
+```
+
+> O mock global do Prisma está em `__mocks__/prisma.ts` e é aplicado automaticamente em todos os testes.
+
