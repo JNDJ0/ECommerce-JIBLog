@@ -144,6 +144,8 @@ class OrderService {
 	async updateOrder(code: string, body: Order) {
 		const order = await prisma.order.findFirst({ where: { code } });
 
+		if (!order) throw new QueryError('Pedido não encontrado.');
+
 		return prisma.order.update({
 			where: { id: order.id },
 			data:  { payment: body.payment, delivery: body.delivery },
@@ -152,6 +154,7 @@ class OrderService {
 
 	async deleteOrder(code: string) {
 		const order = await prisma.order.findFirst({ where: { code } });
+		if (!order) throw new QueryError('Pedido não encontrado.');
 		return prisma.order.delete({ where: { id: order.id } });
 	}
 }
