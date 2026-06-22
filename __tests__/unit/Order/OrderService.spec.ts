@@ -9,7 +9,6 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-// ─── JL-08 ────────────────────────────────────────────────────────────────────
 describe('OrderService.create — pagamento inválido', () => {
   it('deve lançar InvalidParamError quando o método de pagamento é inválido', async () => {
     const body = {
@@ -23,7 +22,6 @@ describe('OrderService.create — pagamento inválido', () => {
   });
 });
 
-// ─── JL-09 ────────────────────────────────────────────────────────────────────
 describe('OrderService.create — validações de estoque', () => {
   it('deve lançar QueryError quando o produto não existe (sem estoque registrado)', async () => {
     (prisma.product.findFirst as jest.Mock).mockResolvedValue(null);
@@ -61,7 +59,6 @@ describe('OrderService.create — validações de estoque', () => {
   });
 });
 
-// ─── JL-10 ────────────────────────────────────────────────────────────────────
 describe('OrderService.create — sucesso', () => {
   it('deve criar o pedido e decrementar o estoque pela quantidade pedida', async () => {
     const product = { id: 1, quantity: 10, price: 100 };
@@ -87,7 +84,6 @@ describe('OrderService.create — sucesso', () => {
   });
 });
 
-// ─── JL-11 ────────────────────────────────────────────────────────────────────
 describe('OrderService.updateStatus — transições de status', () => {
   const baseOrder = {
     id: 10,
@@ -133,5 +129,23 @@ describe('OrderService.updateStatus — transições de status', () => {
     await expect(
       orderService.updateStatus('ABC123', 'CONFIRMADO', 'user', 1)
     ).rejects.toThrow(PermissionError);
+  });
+});
+
+describe('OrderService.updateOrder — pedido não encontrado', () => {
+  it('deve lançar QueryError quando o pedido não existe', async () => {
+    (prisma.order.findFirst as jest.Mock).mockResolvedValue(null);
+
+    await expect(orderService.updateOrder('INEXISTENTE', {} as any)).rejects.toThrow(QueryError);
+    await expect(orderService.updateOrder('INEXISTENTE', {} as any)).rejects.toThrow('Pedido não encontrado.');
+  });
+});
+
+describe('OrderService.deleteOrder — pedido não encontrado', () => {
+  it('deve lançar QueryError quando o pedido não existe', async () => {
+    (prisma.order.findFirst as jest.Mock).mockResolvedValue(null);
+
+    await expect(orderService.deleteOrder('INEXISTENTE')).rejects.toThrow(QueryError);
+    await expect(orderService.deleteOrder('INEXISTENTE')).rejects.toThrow('Pedido não encontrado.');
   });
 });
