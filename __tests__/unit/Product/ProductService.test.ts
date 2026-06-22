@@ -5,7 +5,7 @@ import prisma from '../../../config/client';
 
 const prismaMock = prisma as unknown as {
     owner:   { findFirst: jest.Mock };
-    product: { create: jest.Mock; findMany: jest.Mock };
+    product: { create: jest.Mock; findMany: jest.Mock; update: jest.Mock; delete: jest.Mock };
 };
 
 describe('ProductService.findProducts', () => {
@@ -71,6 +71,49 @@ describe('ProductService.findProductsByOwner', () => {
 
         expect(resultado).toEqual(produtos);
         expect(prismaMock.product.findMany).toHaveBeenCalledWith({ where: { ownerId: owner.id } });
+    });
+});
+
+describe('ProductService.updateProduct', () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
+
+    it('lançar InvalidParamError quando a quantidade for negativa', async () => {
+        await expect(
+            ProductService.updateProduct(1, { quantity: -5 })
+        ).rejects.toThrow(InvalidParamError);
+
+        expect(prismaMock.product.update).not.toHaveBeenCalled();
+    });
+
+    it('atualizar o produto com sucesso', async () => {
+        const produtoAtualizado = { id: 1, name: 'Novo Nome', description: 'Desc', price: 20, quantity: 10, location: 12345678, ownerId: 1 };
+        prismaMock.product.update.mockResolvedValue(produtoAtualizado);
+
+        const resultado = await ProductService.updateProduct(1, { name: 'Novo Nome', price: 20, quantity: 10 });
+
+        expect(resultado).toEqual(produtoAtualizado);
+        expect(prismaMock.product.update).toHaveBeenCalledWith({
+            where: { id: 1 },
+            data: expect.objectContaining({ name: 'Novo Nome', price: 20, quantity: 10 }),
+        });
+    });
+});
+
+describe('ProductService.deleteProduct', () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
+
+    it('deletar o produto com sucesso', async () => {
+        const produtoDeletado = { id: 1, name: 'Caixa', description: 'Desc', price: 10, quantity: 5, location: 12345678, ownerId: 1 };
+        prismaMock.product.delete.mockResolvedValue(produtoDeletado);
+
+        const resultado = await ProductService.deleteProduct(1);
+
+        expect(resultado).toEqual(produtoDeletado);
+        expect(prismaMock.product.delete).toHaveBeenCalledWith({ where: { id: 1 } });
     });
 });
 
