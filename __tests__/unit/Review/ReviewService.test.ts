@@ -84,3 +84,19 @@ describe('ReviewService.create — PermissionError', () => {
     await expect(ReviewService.create('CODE', 1, 4)).rejects.toThrow('Apenas o comprador pode avaliar o pedido.');
   });
 });
+
+describe('ReviewService.create — pedido já avaliado', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('deve lançar QueryError quando o pedido já possui uma review', async () => {
+    prismaMock.order.findFirst.mockResolvedValue({
+      id: 10, userId: 1, status: 'ENTREGUE', productId: 1,
+    });
+    prismaMock.review.findFirst.mockResolvedValue({ id: 5, orderId: 10, rating: 3, comment: null });
+
+    await expect(ReviewService.create('CODE', 1, 4)).rejects.toThrow(QueryError);
+    await expect(ReviewService.create('CODE', 1, 4)).rejects.toThrow('Este pedido já foi avaliado.');
+  });
+});
