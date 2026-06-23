@@ -4,8 +4,9 @@ import { InvalidParamError } from '../../../errors/InvalidParamError';
 import prisma from '../../../config/client';
 
 const prismaMock = prisma as unknown as {
-    deliverer: { findFirst: jest.Mock; create: jest.Mock; delete: jest.Mock };
+    deliverer: { findFirst: jest.Mock; create: jest.Mock; delete: jest.Mock; findMany: jest.Mock };
     user:      { findFirst: jest.Mock; create: jest.Mock; delete: jest.Mock };
+    order:     { findMany: jest.Mock };
     $transaction: jest.Mock;
 };
 
@@ -81,5 +82,68 @@ describe('DelivererService.updateRegion', () => {
             data:  { region: 'Norte' },
         });
         expect(result).toMatchObject({ region: 'Norte' });
+    });
+});
+
+describe('DelivererService.findByUserId', () => {
+    beforeEach(() => { jest.clearAllMocks(); });
+
+    it('deve retornar o entregador pelo userId', async () => {
+        const deliverer = { id: 3, userId: 5, region: 'Norte' };
+        prismaMock.deliverer.findFirst.mockResolvedValue(deliverer);
+
+        const result = await DelivererService.findByUserId(5);
+
+        expect(result).toEqual(deliverer);
+        expect(prismaMock.deliverer.findFirst).toHaveBeenCalledWith({ where: { userId: 5 } });
+    });
+});
+
+describe('DelivererService.findAll', () => {
+    beforeEach(() => { jest.clearAllMocks(); });
+
+    it('deve retornar todos os entregadores', async () => {
+        const deliverers = [{ id: 1, userId: 1, region: 'Sul', user: { name: 'A', email: 'a@test.com' } }];
+        prismaMock.deliverer.findMany.mockResolvedValue(deliverers);
+
+        const result = await DelivererService.findAll();
+
+        expect(result).toEqual(deliverers);
+        expect(prismaMock.deliverer.findMany).toHaveBeenCalledTimes(1);
+    });
+});
+
+describe('DelivererService.findOrders', () => {
+    beforeEach(() => { jest.clearAllMocks(); });
+
+    it('deve retornar pedidos do entregador com sucesso', async () => {
+        const deliverer = { id: 3, userId: 5, region: 'Sul' };
+        const orders    = [{ id: 10, code: 'ORD-01', delivererId: 3 }];
+
+        prismaMock.deliverer.findFirst.mockResolvedValue(deliverer);
+        prismaMock.order.findMany.mockResolvedValue(orders);
+
+        const result = await DelivererService.findOrders(5);
+
+        expect(result).toEqual(orders);
+        expect(prismaMock.order.findMany).toHaveBeenCalledWith({ where: { delivererId: deliverer.id } });
+    });
+
+    it('deve lançar QueryError quando entregador não encontrado', async () => {
+        prismaMock.deliverer.findFirst.mockResolvedValue(null);
+
+        await expect(DelivererService.findOrders(99)).rejects.toThrow(QueryError);
+        await expect(DelivererService.findOrders(99)).rejects.toThrow('Entregador não encontrado.');
+    });
+});
+
+describe('DelivererService.updateRegion — entregador não encontrado', () => {
+    beforeEach(() => { jest.clearAllMocks(); });
+
+    it('deve lançar QueryError quando entregador não existe', async () => {
+        prismaMock.deliverer.findFirst.mockResolvedValue(null);
+
+        await expect(DelivererService.updateRegion(99, 'Norte')).rejects.toThrow(QueryError);
+        await expect(DelivererService.updateRegion(99, 'Norte')).rejects.toThrow('Entregador não encontrado.');
     });
 });

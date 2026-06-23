@@ -149,3 +149,59 @@ describe('OrderService.deleteOrder — pedido não encontrado', () => {
     await expect(orderService.deleteOrder('INEXISTENTE')).rejects.toThrow('Pedido não encontrado.');
   });
 });
+
+describe('OrderService.findByCode', () => {
+  it('deve retornar o pedido pelo código', async () => {
+    const fakeOrder = { id: 1, code: 'ABC123', status: 'PENDENTE' };
+    (prisma.order.findFirst as jest.Mock).mockResolvedValue(fakeOrder);
+
+    const result = await orderService.findByCode('ABC123');
+
+    expect(result).toEqual(fakeOrder);
+    expect(prisma.order.findFirst).toHaveBeenCalledWith({ where: { code: 'ABC123' } });
+  });
+});
+
+describe('OrderService.findOrdersByUser', () => {
+  it('deve retornar pedidos do usuário', async () => {
+    const fakeOrders = [{ id: 1, userId: 5 }, { id: 2, userId: 5 }];
+    (prisma.order.findMany as jest.Mock).mockResolvedValue(fakeOrders);
+
+    const result = await orderService.findOrdersByUser(5);
+
+    expect(result).toEqual(fakeOrders);
+    expect(prisma.order.findMany).toHaveBeenCalledWith({ where: { userId: 5 } });
+  });
+});
+
+describe('OrderService.findOrders', () => {
+  it('deve retornar todos os pedidos', async () => {
+    const fakeOrders = [{ id: 1 }, { id: 2 }];
+    (prisma.order.findMany as jest.Mock).mockResolvedValue(fakeOrders);
+
+    const result = await orderService.findOrders();
+
+    expect(result).toEqual(fakeOrders);
+    expect(prisma.order.findMany).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('OrderService.updateStatus — cancelamento devolve estoque', () => {
+  it('deve cancelar pedido e devolver quantidade ao estoque', async () => {
+    const order = { id: 10, code: 'ABC123', status: 'PENDENTE', productId: 1, quantity: 3 };
+    (prisma.order.findFirst as jest.Mock).mockResolvedValue(order);
+    (prisma.$transaction as jest.Mock).mockResolvedValue([{}, {}]);
+
+    await orderService.updateStatus('ABC123', 'CANCELADO', 'owner', 1);
+
+    expect(prisma.$transaction).toHaveBeenCalledTimes(1);
+  });
+
+  it('deve lançar QueryError quando pedido não encontrado', async () => {
+    (prisma.order.findFirst as jest.Mock).mockResolvedValue(null);
+
+    await expect(orderService.updateStatus('INVALIDO', 'CONFIRMADO', 'owner', 1))
+      .rejects.toThrow(QueryError);
+  });
+});
+
