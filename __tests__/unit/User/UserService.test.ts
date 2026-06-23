@@ -52,3 +52,29 @@ describe('UserService.create — CEP inválido', () => {
     await expect(UserService.create(body)).rejects.toThrow('Esse CEP não é válido.');
   });
 });
+
+describe('UserService.findByEmail', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('deve retornar o usuário quando o email existe', async () => {
+    const fakeUser = { id: 1, email: 'teste@test.com', name: 'Teste', password: 'hash', address: 12345678, role: 'user' };
+    prismaMock.user.findFirst.mockResolvedValue(fakeUser);
+
+    const result = await UserService.findByEmail('teste@test.com');
+
+    expect(result).toEqual(fakeUser);
+    expect(prismaMock.user.findFirst).toHaveBeenCalledWith({
+      where: { email: 'teste@test.com' },
+    });
+  });
+
+  it('deve retornar null quando o email não está cadastrado', async () => {
+    prismaMock.user.findFirst.mockResolvedValue(null);
+
+    const result = await UserService.findByEmail('naoexiste@test.com');
+
+    expect(result).toBeNull();
+  });
+});
