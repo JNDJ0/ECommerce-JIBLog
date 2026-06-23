@@ -26,22 +26,25 @@ describe('Review — fluxo completo', () => {
     const fakeOrder  = { id: 10, code: 'PEDIDO-XYZ', userId: 1, status: 'ENTREGUE', productId: 1, quantity: 1 };
     const fakeReview = { id: 1, orderId: 10, rating: 5, comment: 'Excelente!' };
 
+    // 1) Criar review
     prismaMock.order.findFirst.mockResolvedValue(fakeOrder);
     prismaMock.review.findFirst.mockResolvedValue(null);   // ainda não avaliado
     prismaMock.review.create.mockResolvedValue(fakeReview);
 
     const createRes = await request(app)
-      .post('/api/reviews/create')
+      .post('/api/reviews/PEDIDO-XYZ')
       .set('Cookie', `jwt=${userToken}`)
-      .send({ code: 'PEDIDO-XYZ', rating: 5, comment: 'Excelente!' });
+      .send({ rating: 5, comment: 'Excelente!' });
 
     expect(createRes.status).toBe(201);
 
+    // 2) Buscar review pelo código do pedido
     prismaMock.order.findFirst.mockResolvedValue(fakeOrder);
     prismaMock.review.findFirst.mockResolvedValue(fakeReview);
 
     const getRes = await request(app)
-      .get('/api/reviews/order/PEDIDO-XYZ');
+      .get('/api/reviews/order/PEDIDO-XYZ')
+      .set('Cookie', `jwt=${userToken}`);
 
     expect(getRes.status).toBe(200);
     expect(getRes.body).toMatchObject({ rating: 5, comment: 'Excelente!' });
