@@ -2,6 +2,7 @@ import prisma from '../../../../config/client';
 import UserService from '../../User/services/UserService';
 import { Owner, User} from '@prisma/client';
 import { QueryError } from '../../../../errors/QueryError';
+import { hash } from 'bcrypt';
 
 class OwnerService{
 	async create(body: User){
@@ -45,19 +46,20 @@ class OwnerService{
 	}
 
 	async updateOwner(email: string, body: User){
+	const hashedPassword = await hash(body.password, 10);
 
-		const updatedUser = await prisma.user.update({
-			where:{
-				email: email,
-			},
-			data:{
-				email: body.email,
-				name: body.name,
-				password: body.password,
-			}
-		});
+	const updatedUser = await prisma.user.update({
+		where:{
+		email: email,
+		},
+		data:{
+		email: body.email,
+		name: body.name,
+		password: hashedPassword, 
+		}
+	});
 
-		return updatedUser;
+	return updatedUser;
 	}
 
 	async deleteOwner(email: string){
