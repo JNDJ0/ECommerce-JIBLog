@@ -32,3 +32,23 @@ describe('UserService.create — email duplicado', () => {
     await expect(UserService.create(body)).rejects.toThrow('Esse email já está cadastrado.');
   });
 });
+
+describe('UserService.create — CEP inválido', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('deve lançar InvalidParamError quando o CEP tem formato inválido', async () => {
+    prismaMock.user.findFirst.mockResolvedValue(null); // email livre
+
+    const body = {
+      email: 'novo@test.com',
+      name: 'Novo',
+      password: '123456',
+      address: 1234,   // CEP inválido: menos de 8 dígitos
+    } as any;
+
+    await expect(UserService.create(body)).rejects.toThrow(InvalidParamError);
+    await expect(UserService.create(body)).rejects.toThrow('Esse CEP não é válido.');
+  });
+});
