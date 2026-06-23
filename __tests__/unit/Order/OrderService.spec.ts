@@ -205,3 +205,33 @@ describe('OrderService.updateStatus — cancelamento devolve estoque', () => {
   });
 });
 
+describe('OrderService.updateOrder — sucesso', () => {
+  it('deve atualizar o pedido quando encontrado', async () => {
+    const order   = { id: 5, code: 'UPD-001', status: 'PENDENTE' };
+    const updated = { ...order, payment: 'Pix', delivery: 50 };
+
+    (prisma.order.findFirst as jest.Mock).mockResolvedValue(order);
+    (prisma.order.update as jest.Mock).mockResolvedValue(updated);
+
+    const result = await orderService.updateOrder('UPD-001', { payment: 'Pix', delivery: 50 } as any);
+
+    expect(result).toEqual(updated);
+    expect(prisma.order.update).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { id: order.id } })
+    );
+  });
+});
+
+describe('OrderService.deleteOrder — sucesso', () => {
+  it('deve deletar o pedido quando encontrado', async () => {
+    const order = { id: 7, code: 'DEL-001', status: 'PENDENTE' };
+
+    (prisma.order.findFirst as jest.Mock).mockResolvedValue(order);
+    (prisma.order.delete as jest.Mock).mockResolvedValue(order);
+
+    const result = await orderService.deleteOrder('DEL-001');
+
+    expect(result).toEqual(order);
+    expect(prisma.order.delete).toHaveBeenCalledWith({ where: { id: order.id } });
+  });
+});
