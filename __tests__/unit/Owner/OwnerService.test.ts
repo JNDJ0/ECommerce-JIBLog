@@ -70,3 +70,27 @@ describe('OwnerService.updateOwner', () => {
     expect(isValid).toBe(true);
   });
 });
+
+describe('OwnerService.deleteOwner', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('deve deletar produtos usando owner.id e não user.id', async () => {
+    const fakeUser  = { id: 99, email: 'owner@test.com', name: 'Owner', role: 'owner' };
+    const fakeOwner = { id: 7, userId: 99 };   // owner.id (7) ≠ user.id (99)
+
+    prismaMock.user.findFirst.mockResolvedValue(fakeUser);
+    prismaMock.owner.findFirst.mockResolvedValue(fakeOwner);
+    prismaMock.$transaction.mockResolvedValue([{}, {}, {}]);
+
+    await OwnerService.deleteOwner('owner@test.com');
+
+    const transactionCalls = prismaMock.$transaction.mock.calls[0][0];
+
+    // Verifica que deleteMany usa owner.id (7), não user.id (99)
+    expect(prismaMock.product.deleteMany).toHaveBeenCalledWith({
+      where: { ownerId: fakeOwner.id },
+    });
+  });
+});
