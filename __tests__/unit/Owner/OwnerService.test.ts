@@ -63,9 +63,7 @@ describe('OwnerService.updateOwner', () => {
 
     const callData = prismaMock.user.update.mock.calls[0][0].data;
 
-    // A senha salva não pode ser igual à senha em texto plano
     expect(callData.password).not.toBe('senhaPlana');
-    // Deve ser um hash bcrypt válido
     const isValid = await bcrypt.compare('senhaPlana', callData.password);
     expect(isValid).toBe(true);
   });
@@ -78,7 +76,7 @@ describe('OwnerService.deleteOwner', () => {
 
   it('deve deletar produtos usando owner.id e não user.id', async () => {
     const fakeUser  = { id: 99, email: 'owner@test.com', name: 'Owner', role: 'owner' };
-    const fakeOwner = { id: 7, userId: 99 };   // owner.id (7) ≠ user.id (99)
+    const fakeOwner = { id: 7, userId: 99 };   
 
     prismaMock.user.findFirst.mockResolvedValue(fakeUser);
     prismaMock.owner.findFirst.mockResolvedValue(fakeOwner);
@@ -88,7 +86,6 @@ describe('OwnerService.deleteOwner', () => {
 
     const transactionCalls = prismaMock.$transaction.mock.calls[0][0];
 
-    // Verifica que deleteMany usa owner.id (7), não user.id (99)
     expect(prismaMock.product.deleteMany).toHaveBeenCalledWith({
       where: { ownerId: fakeOwner.id },
     });
