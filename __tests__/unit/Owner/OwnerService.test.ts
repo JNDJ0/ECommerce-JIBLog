@@ -1,5 +1,6 @@
 import OwnerService from '../../../src/domains/Owner/services/OwnerService';
 import prisma from '../../../config/client';
+import * as bcrypt from 'bcrypt';
 
 const prismaMock = prisma as unknown as {
   user:  { findFirst: jest.Mock; create: jest.Mock; update: jest.Mock; delete: jest.Mock };
@@ -45,5 +46,27 @@ describe('OwnerService.findByEmail', () => {
 
     await expect(OwnerService.findByEmail('naoexiste@test.com')).rejects.toThrow(QueryError);
     await expect(OwnerService.findByEmail('naoexiste@test.com')).rejects.toThrow('Proprietário não encontrado.');
+  });
+});
+
+describe('OwnerService.updateOwner', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('deve hashear a senha com bcrypt antes de salvar', async () => {
+    const updatedUser = { id: 1, email: 'owner@test.com', name: 'Owner', password: 'HASHED', address: 12345678, role: 'owner' };
+    prismaMock.user.update.mockResolvedValue(updatedUser);
+
+    const body = { email: 'owner@test.com', name: 'Owner', password: 'senhaPlana', address: 12345678 } as any;
+    await OwnerService.updateOwner('owner@test.com', body);
+
+    const callData = prismaMock.user.update.mock.calls[0][0].data;
+
+    // A senha salva não pode ser igual à senha em texto plano
+    expect(callData.password).not.toBe('senhaPlana');
+    // Deve ser um hash bcrypt válido
+    const isValid = await bcrypt.compare('senhaPlana', callData.password);
+    expect(isValid).toBe(true);
   });
 });
