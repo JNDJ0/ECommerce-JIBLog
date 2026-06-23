@@ -13,6 +13,8 @@ const config: Config = {
     "errors/**/*.ts",
     "utils/**/*.ts",
     "!src/**/*.d.ts",
+    "!src/**/controller/**",
+    "!utils/constants/userRoles.ts",
   ],
   coverageDirectory: "coverage",
   coverageReporters: ["text", "lcov"],

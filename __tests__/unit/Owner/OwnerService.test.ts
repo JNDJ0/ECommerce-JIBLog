@@ -6,7 +6,7 @@ import * as bcrypt from 'bcrypt';
 const prismaMock = prisma as unknown as {
   user:  { findFirst: jest.Mock; create: jest.Mock; update: jest.Mock; delete: jest.Mock };
   owner: { findFirst: jest.Mock; create: jest.Mock; update: jest.Mock; delete: jest.Mock };
-  product: { deleteMany: jest.Mock };
+  product: { deleteMany: jest.Mock; findMany: jest.Mock };
   $transaction: jest.Mock;
 };
 
@@ -92,3 +92,26 @@ describe('OwnerService.deleteOwner', () => {
     });
   });
 });
+
+describe('OwnerService.findProductsByOwner', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('deve retornar os produtos do owner pelo userId', async () => {
+    const fakeOwner    = { id: 7, userId: 1 };
+    const fakeProducts = [
+      { id: 1, name: 'Produto A', price: 10, quantity: 5, ownerId: 7 },
+      { id: 2, name: 'Produto B', price: 20, quantity: 3, ownerId: 7 },
+    ];
+
+    prismaMock.owner.findFirst.mockResolvedValue(fakeOwner);
+    prismaMock.product.findMany.mockResolvedValue(fakeProducts);
+
+    const result = await OwnerService.findProductsByOwner(1);
+
+    expect(result).toEqual(fakeProducts);
+    expect(prismaMock.owner.findFirst).toHaveBeenCalledWith({ where: { userId: 1 } });
+    expect(prismaMock.product.findMany).toHaveBeenCalledWith({ where: { ownerId: fakeOwner.id } });
+  });
+});
