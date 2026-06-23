@@ -92,14 +92,21 @@ npm run test:watch
 
 ```
 __tests__/
+├── helpers/
+│   └── testUtils.ts            # utilitários e helpers de teste
 ├── unit/
-│   ├── Deliverer/   # DelivererService (create, updateRegion, delete)
-│   ├── Order/       # OrderService (create, updateStatus)
-│   └── Product/     # ProductService
+│   ├── Deliverer/              # DelivererService (create, updateRegion, delete)
+│   ├── Order/                  # OrderService (create, updateStatus, updateOrder)
+│   ├── Owner/                  # OwnerService (create, updateOwner, deleteOwner)
+│   ├── Product/                # ProductService (findProducts, findProductsByOwner, create/update/delete)
+│   ├── Review/                 # ReviewService (create, validação de reviews)
+│   └── User/                   # UserService (create, findByEmail, update, delete)
 └── integration/
-    ├── user.e2e.test.ts      # Fluxo criação → login → myAccount
-    ├── order.e2e.test.ts     # Fluxo produto → pedido → estoque
-    └── deliverer.e2e.test.ts # Fluxo completo do entregador
+    ├── user.e2e.test.ts        # fluxo criação → login → myAccount
+    ├── order.e2e.test.ts       # fluxo owner cria produto → user faz pedido → estoque decrementado
+    ├── deliverer.e2e.test.ts   # entregador create, myOrders, updateRegion, delete
+    ├── review.e2e.test.ts      # pedido entregue → criar review → buscar review por código
+    └── status.e2e.test.ts      # transição de status PENDENTE → CONFIRMADO → EM_ENTREGA → ENTREGUE
 ```
 
 > O mock global do Prisma está em `__mocks__/prisma.ts` e é aplicado automaticamente em todos os testes.
