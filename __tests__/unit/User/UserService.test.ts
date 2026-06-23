@@ -78,3 +78,38 @@ describe('UserService.findByEmail', () => {
     expect(result).toBeNull();
   });
 });
+
+describe('UserService.updateUser', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('deve atualizar o usuário com sucesso', async () => {
+    const updatedUser = { id: 1, email: 'novo@test.com', name: 'Novo Nome', password: 'hash', address: 87654321, role: 'user' };
+    prismaMock.user.update.mockResolvedValue(updatedUser);
+
+    const body = { email: 'novo@test.com', name: 'Novo Nome', password: 'novasenha', address: 87654321 } as any;
+    const result = await UserService.updateUser('antigo@test.com', body);
+
+    expect(result).toEqual(updatedUser);
+    expect(prismaMock.user.update).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { email: 'antigo@test.com' } })
+    );
+  });
+});
+
+describe('UserService.deleteUser', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('deve deletar o usuário com sucesso', async () => {
+    const deletedUser = { id: 1, email: 'teste@test.com', name: 'Teste', password: 'hash', address: 12345678, role: 'user' };
+    prismaMock.user.delete.mockResolvedValue(deletedUser);
+
+    const result = await UserService.deleteUser('teste@test.com');
+
+    expect(result).toEqual(deletedUser);
+    expect(prismaMock.user.delete).toHaveBeenCalledWith({ where: { email: 'teste@test.com' } });
+  });
+});
