@@ -43,3 +43,19 @@ describe('ReviewService.create — notas válidas e comentário opcional', () =>
     expect(result).toEqual(fakeReview);
   });
 });
+
+describe('ReviewService.create — notas inválidas', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('deve lançar InvalidParamError quando a nota é 0', async () => {
+    await expect(ReviewService.create('CODE', 1, 0)).rejects.toThrow(InvalidParamError);
+    await expect(ReviewService.create('CODE', 1, 0)).rejects.toThrow('A nota deve ser um número inteiro entre 1 e 5.');
+  });
+
+  it('deve lançar InvalidParamError quando a nota é 6', async () => {
+    await expect(ReviewService.create('CODE', 1, 6)).rejects.toThrow(InvalidParamError);
+    await expect(ReviewService.create('CODE', 1, 6)).rejects.toThrow('A nota deve ser um número inteiro entre 1 e 5.');
+  });
+});
