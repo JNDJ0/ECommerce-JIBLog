@@ -36,6 +36,7 @@ npm install
 
 ```bash
 npx prisma migrate dev
+npx prisma generate
 ```
 
 ### 3. Iniciar o backend
