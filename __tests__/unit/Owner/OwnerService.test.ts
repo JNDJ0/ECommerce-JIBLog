@@ -34,3 +34,16 @@ describe('OwnerService.create', () => {
     expect(result).toEqual(fakeOwner);
   });
 });
+
+describe('OwnerService.findByEmail', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('deve lançar QueryError quando o usuário não existe', async () => {
+    prismaMock.user.findFirst.mockResolvedValue(null);
+
+    await expect(OwnerService.findByEmail('naoexiste@test.com')).rejects.toThrow(QueryError);
+    await expect(OwnerService.findByEmail('naoexiste@test.com')).rejects.toThrow('Proprietário não encontrado.');
+  });
+});
