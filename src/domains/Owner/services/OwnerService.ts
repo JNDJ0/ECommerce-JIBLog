@@ -61,27 +61,37 @@ class OwnerService{
 	}
 
 	async deleteOwner(email: string){
-		const user = await prisma.user.findFirst({where:{email: email}});
+	const user = await prisma.user.findFirst({where:{email: email}});
 
-		await prisma.$transaction([
-			prisma.product.deleteMany({
-				where: {
-					ownerId: user.id,
-				},
-			}),
-			prisma.owner.delete({
-				where: {
-					userId: user.id,
-				},
-			}),
-			prisma.user.delete({
-				where: {
-					id: user.id,
-				},
-			})
-		]);
+	if (!user) {
+		throw new QueryError('Usuário não encontrado.');
+	}
 
-		return;
+	const owner = await prisma.owner.findFirst({where:{userId: user.id}});
+
+	if (!owner) {
+		throw new QueryError('Proprietário não encontrado.');
+	}
+
+	await prisma.$transaction([
+		prisma.product.deleteMany({
+		where: {
+			ownerId: owner.id,
+		},
+		}),
+		prisma.owner.delete({
+		where: {
+			userId: user.id,
+		},
+		}),
+		prisma.user.delete({
+		where: {
+			id: user.id,
+		},
+		})
+	]);
+
+	return;
 	}
 }
 
