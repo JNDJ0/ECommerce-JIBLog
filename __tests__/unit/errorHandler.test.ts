@@ -1,9 +1,9 @@
-import { errorHandler } from '../../../src/middlewares/errorHandler';
-import { InvalidParamError } from '../../../errors/InvalidParamError';
-import { TokenError } from '../../../errors/TokenError';
-import { QueryError } from '../../../errors/QueryError';
-import { LoginError } from '../../../errors/LoginError';
-import { NotAuthorizedError } from '../../../errors/NotAuthorizedError';
+import { errorHandler } from '../../src/middlewares/errorHandler';
+import { InvalidParamError } from '../../errors/InvalidParamError';
+import { TokenError } from '../../errors/TokenError';
+import { QueryError } from '../../errors/QueryError';
+import { LoginError } from '../../errors/LoginError';
+import { NotAuthorizedError } from '../../errors/NotAuthorizedError';
 import { Request, Response, NextFunction } from 'express';
 
 function makeRes() {
