@@ -35,7 +35,7 @@ describe('Review — fluxo completo', () => {
       .set('Cookie', `jwt=${userToken}`)
       .send({ code: 'PEDIDO-XYZ', rating: 5, comment: 'Excelente!' });
 
-    expect(createRes.status).toBe(200);
+    expect(createRes.status).toBe(201);
 
     prismaMock.order.findFirst.mockResolvedValue(fakeOrder);
     prismaMock.review.findFirst.mockResolvedValue(fakeReview);

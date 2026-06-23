@@ -1,5 +1,7 @@
 import ReviewService from '../../../src/domains/Review/services/ReviewService';
 import prisma from '../../../config/client';
+import { InvalidParamError } from '../../../errors/InvalidParamError';
+import { QueryError } from '../../../errors/QueryError';
 import { PermissionError } from '../../../errors/PermissionError';
 
 const prismaMock = prisma as unknown as {

@@ -1,4 +1,5 @@
 import OwnerService from '../../../src/domains/Owner/services/OwnerService';
+import { QueryError } from '../../../errors/QueryError';
 import prisma from '../../../config/client';
 import * as bcrypt from 'bcrypt';
 

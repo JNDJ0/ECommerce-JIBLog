@@ -43,7 +43,7 @@ describe('Fluxo de status do pedido', () => {
     prismaMock.order.update.mockResolvedValue({ ...baseOrder, status: 'CONFIRMADO' });
 
     const confirmRes = await request(app)
-      .put('/api/orders/updateStatus/PEDIDO-001')
+      .patch('/api/orders/PEDIDO-001/status')
       .set('Cookie', `jwt=${ownerToken}`)
       .send({ status: 'CONFIRMADO' });
 
@@ -54,7 +54,7 @@ describe('Fluxo de status do pedido', () => {
     prismaMock.order.update.mockResolvedValue({ ...baseOrder, status: 'EM_ENTREGA', delivererId: fakeDeliverer.id });
 
     const emEntregaRes = await request(app)
-      .put('/api/orders/updateStatus/PEDIDO-001')
+      .patch('/api/orders/PEDIDO-001/status')
       .set('Cookie', `jwt=${delivererToken}`)
       .send({ status: 'EM_ENTREGA' });
 
@@ -64,10 +64,10 @@ describe('Fluxo de status do pedido', () => {
     prismaMock.order.update.mockResolvedValue({ ...baseOrder, status: 'ENTREGUE' });
 
     const entregueRes = await request(app)
-      .put('/api/orders/updateStatus/PEDIDO-001')
+      .patch('/api/orders/PEDIDO-001/status')
       .set('Cookie', `jwt=${delivererToken}`)
       .send({ status: 'ENTREGUE' });
 
     expect(entregueRes.status).toBe(200);
   });
-});
+});

@@ -24,6 +24,10 @@ const config: Config = {
       statements: 80,
     },
   },
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '__tests__/helpers/',
+  ],
 };
 
 export default config;

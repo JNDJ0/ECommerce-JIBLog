@@ -1,5 +1,6 @@
 import UserService from '../../../src/domains/User/services/UserService';
-import { QueryError } from '../../../errors/QueryError'
+import { QueryError } from '../../../errors/QueryError';
+import { InvalidParamError } from '../../../errors/InvalidParamError';
 import prisma from '../../../config/client';
 
 const prismaMock = prisma as unknown as {
