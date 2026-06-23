@@ -1,5 +1,6 @@
 import ReviewService from '../../../src/domains/Review/services/ReviewService';
 import prisma from '../../../config/client';
+import { PermissionError } from '../../../errors/PermissionError';
 
 const prismaMock = prisma as unknown as {
   order:  { findFirst: jest.Mock };
@@ -57,5 +58,29 @@ describe('ReviewService.create — notas inválidas', () => {
   it('deve lançar InvalidParamError quando a nota é 6', async () => {
     await expect(ReviewService.create('CODE', 1, 6)).rejects.toThrow(InvalidParamError);
     await expect(ReviewService.create('CODE', 1, 6)).rejects.toThrow('A nota deve ser um número inteiro entre 1 e 5.');
+  });
+});
+
+describe('ReviewService.create — PermissionError', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('deve lançar PermissionError quando o pedido não está com status ENTREGUE', async () => {
+    prismaMock.order.findFirst.mockResolvedValue({
+      id: 10, userId: 1, status: 'PENDENTE', productId: 1,
+    });
+
+    await expect(ReviewService.create('CODE', 1, 4)).rejects.toThrow(PermissionError);
+    await expect(ReviewService.create('CODE', 1, 4)).rejects.toThrow('Só é possível avaliar pedidos com status ENTREGUE.');
+  });
+
+  it('deve lançar PermissionError quando o usuário não é o comprador do pedido', async () => {
+    prismaMock.order.findFirst.mockResolvedValue({
+      id: 10, userId: 99, status: 'ENTREGUE', productId: 1,  // userId 99 ≠ userId 1 passado
+    });
+
+    await expect(ReviewService.create('CODE', 1, 4)).rejects.toThrow(PermissionError);
+    await expect(ReviewService.create('CODE', 1, 4)).rejects.toThrow('Apenas o comprador pode avaliar o pedido.');
   });
 });
